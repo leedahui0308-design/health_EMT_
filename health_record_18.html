@@ -1,18 +1,21 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>개인 건강기록</title>
+
 <style>
-body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0; padding:0;}
-.container { max-width: 400px; margin:30px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 8px rgba(0,0,0,0.1); }
-h2 { text-align:center; }
-label { display:block; margin-top:10px; font-weight:bold; }
-input, textarea { width:100%; padding:8px; margin-top:5px; border-radius:5px; border:1px solid #ccc; }
-button { width:100%; margin-top:15px; padding:10px; border:none; border-radius:8px; background:#2b7cff; color:white; font-size:16px; }
-.saved { text-align:center; color:green; margin-top:10px; display:none; }
+body { font-family: sans-serif; background:#f5f5f5; padding:15px; }
+.container { background:white; padding:15px; border-radius:10px; max-width:500px; margin:auto; }
+label { font-weight:bold; margin-top:10px; display:block; }
+input, textarea { width:100%; padding:8px; margin-top:5px; border-radius:5px; border:1px solid #ccc;}
+button { margin-top:15px; padding:10px; width:100%; background:#4CAF50; color:white; border:none; border-radius:8px; }
+.status { font-size:13px; margin-top:8px; color:green; }
 </style>
 </head>
+
 <body>
 <div class="container">
 <h2>개인 건강기록</h2>
@@ -20,55 +23,57 @@ button { width:100%; margin-top:15px; padding:10px; border:none; border-radius:8
 <label>이름</label>
 <input id="name">
 
-<label>병력 / 복용약 / 알러지</label>
+<label>병력</label>
 <textarea id="history"></textarea>
 
-<label>다니는 병원</label>
+<label>병원</label>
 <input id="hospital">
 
-<label>보호자 연락처 및 관계</label>
-<input id="guardian">
+<label>보호자</label>
+<textarea id="guardian"></textarea>
 
-<label>기타사항</label>
-<textarea id="note"></textarea>
+<label>기타</label>
+<textarea id="etc"></textarea>
 
 <button onclick="saveData()">저장</button>
-<div class="saved" id="msg">저장 완료!</div>
+<div class="status" id="status"></div>
 </div>
+
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwW_3vtk4r5yU5BPnkrxYeFE0pNDcr6hbHN7XnlDhqvQqhb_RMdNStf1IY5ej1osuJ5/exec";
+const SERVER_URL = "https://script.google.com/macros/s/AKfycbzoA4C6KhYLgRrIGt7aUvom5DN9JysXoZyk15H9_QmUBRfgOXmfGIbSN-QsHKH-H1u8/exec";
+const PAGE_ID = "user18";
 
-// 페이지 열릴 때 서버에서 불러오기
-window.onload = function () {
-  fetch(API)
+function loadData() {{
+  fetch(SERVER_URL + "?id=" + PAGE_ID)
     .then(res => res.json())
-    .then(data => {
-      document.getElementById("name").value = data.name || "";
-      document.getElementById("history").value = data.history || "";
-      document.getElementById("hospital").value = data.hospital || "";
-      document.getElementById("guardian").value = data.guardian || "";
-      document.getElementById("note").value = data.etc || "";
-    })
-    .catch(() => console.log("아직 저장된 데이터 없음"));
-};
+    .then(data => {{
+      if (!data) return;
+      name.value = data.name || "";
+      history.value = data.history || "";
+      hospital.value = data.hospital || "";
+      guardian.value = data.guardian || "";
+      etc.value = data.etc || "";
+    }});
+}}
 
-// 서버로 저장
-function saveData() {
-  const data = {
-    name: document.getElementById("name").value,
-    history: document.getElementById("history").value,
-    hospital: document.getElementById("hospital").value,
-    guardian: document.getElementById("guardian").value,
-    etc: document.getElementById("note").value
-  };
+function saveData() {{
+  const body = {{
+    name: name.value,
+    history: history.value,
+    hospital: hospital.value,
+    guardian: guardian.value,
+    etc: etc.value
+  }};
 
-  fetch(API, {
+  fetch(SERVER_URL + "?id=" + PAGE_ID, {{
     method: "POST",
-    body: JSON.stringify(data)
-  }).then(() => {
-    document.getElementById("msg").style.display = "block";
-  });
-}
+    body: JSON.stringify(body)
+  }})
+  .then(() => status.innerText = "저장 완료 ✅")
+  .catch(() => status.innerText = "저장 실패 ❌");
+}}
+
+loadData();
 </script>
 </body>
 </html>
